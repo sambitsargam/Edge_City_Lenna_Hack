@@ -4,15 +4,11 @@ import { startFundRaising } from '../redux/interactions'
 import { useDispatch, useSelector } from 'react-redux'
 import { etherToWei } from '../helper/helper'
 import { toastSuccess,toastError } from '../helper/toastMessage'
-import { useIDKit } from "@worldcoin/idkit";
+import { IDKitWidget, VerificationLevel } from '@worldcoin/idkit'
 import dynamic from "next/dynamic";
 
 const FundRiserForm = () => {
 
-  const IDKitWidget = dynamic(
-    () => import("@worldcoin/idkit").then((mod) => mod.IDKitWidget),
-    { ssr: false }
-  );
 
   const { open, setOpen } = useIDKit();
   const [isVerified, setIsVerified] = useState(false);
