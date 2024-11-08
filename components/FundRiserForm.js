@@ -1,116 +1,71 @@
-import React, { useEffect, useState , useCallback } from 'react'
-import moment from 'moment'
-import { startFundRaising } from '../redux/interactions'
-import { useDispatch, useSelector } from 'react-redux'
-import { etherToWei } from '../helper/helper'
-import { toastSuccess,toastError } from '../helper/toastMessage'
-import { IDKitWidget, VerificationLevel } from '@worldcoin/idkit'
-import dynamic from "next/dynamic";
+import React, { useEffect, useState, useCallback } from 'react';
+import moment from 'moment';
+import { startFundRaising } from '../redux/interactions';
+import { useDispatch, useSelector } from 'react-redux';
+import { etherToWei } from '../helper/helper';
+import { toastSuccess, toastError } from '../helper/toastMessage';
+import { IDKitWidget, VerificationLevel } from '@worldcoin/idkit';
 
 const FundRiserForm = () => {
-
-
-  const { open, setOpen } = useIDKit();
   const [isVerified, setIsVerified] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [targetedContributionAmount, setTargetedContributionAmount] = useState("");
+  const [minimumContributionAmount, setMinimumContributionAmount] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [btnLoading, setBtnLoading] = useState(false);
 
-  // Your existing handleProof function
+  const crowdFundingContract = useSelector(state => state.fundingReducer.contract);
+  const account = useSelector(state => state.web3Reducer.account);
+  const web3 = useSelector(state => state.web3Reducer.connection);
+  const dispatch = useDispatch();
+
   const handleProof = useCallback((result) => {
-    // Assuming the verification is successful based on your logic
     setIsVerified(true);
-
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => resolve(), 3000);
     });
   }, []);
 
   useEffect(() => {
-    setOpen(false);
+    setIsVerified(false);
   }, []);
-   
-    const crowdFundingContract = useSelector(state=>state.fundingReducer.contract)
-    const account = useSelector(state=>state.web3Reducer.account)
-    const web3 = useSelector(state=>state.web3Reducer.connection)
 
-    const dispatch = useDispatch()
+  const enableButton = () => {
+    setIsVerified(true);
+  };
 
-    const [title,setTitle] = useState("")
-    const [description,setDescription] = useState("")
-    const [targetedContributionAmount,setTargetedContributionAmount] = useState("")
-    const [minimumContributionAmount,setMinimumContributionAmount] = useState("")
-    const [deadline,setDeadline] = useState("")
-    const [btnLoading,setBtnLoading] = useState(false)
-  //  const onSuccess = (result) => {
-  //    // This is where you should perform frontend actions once a user has been verified, such as redirecting to a new page
-  //    window.alert(
-  //      "Successfully verified with World ID! Your nullifier hash is: " +
-  //        result.nullifier_hash
-  //    );
-  //  };
+  const riseFund = (e) => {
+    e.preventDefault();
+    setBtnLoading(true);
+    const unixDate = moment(deadline).valueOf();
 
-  //  const handleProof = async (result) => {
-  //    console.log("Proof received from IDKit:\n", JSON.stringify(result)); // Log the proof from IDKit to the console for visibility
-  //    const reqBody = {
-  //      merkle_root: result.merkle_root,
-  //      nullifier_hash: result.nullifier_hash,
-  //      proof: result.proof,
-  //      credential_type: result.credential_type,
-  //      action: process.env.NEXT_PUBLIC_WLD_ACTION_NAME,
-  //      signal: "",
-  //    };
-  //    console.log(
-  //      "Sending proof to backend for verification:\n",
-  //      JSON.stringify(reqBody)
-  //    ); // Log the proof being sent to our backend for visibility
-  //    const res = await fetch("/api/verify", {
-  //      method: "POST",
-  //      headers: {
-  //        "Content-Type": "application/json",
-  //      },
-  //      body: JSON.stringify(reqBody),
-  //    });
-  //    const data = await res.json();
-  //    if (res.status === 200) {
-  //      console.log("Successful response from backend:\n", data); // Log the response from our backend for visibility
-  //    } else {
-  //      throw new Error(
-  //        `Error code ${res.status} (${data.code}): ${data.detail}` ??
-  //          "Unknown error."
-  //      ); // Throw an error if verification fails
-  //    }
-  //  };
+    const onSuccess = () => {
+      setBtnLoading(false);
+      setTitle("");
+      setDescription("");
+      setTargetedContributionAmount("");
+      setMinimumContributionAmount("");
+      setDeadline("");
+      toastSuccess("Fundraising started 🎉");
+    };
 
+    const onError = (error) => {
+      setBtnLoading(false);
+      toastError(error);
+    };
 
-    const riseFund = (e) =>{
-       e.preventDefault();
-       setBtnLoading(true)
-       const unixDate = moment(deadline).valueOf()
+    const data = {
+      minimumContribution: etherToWei(minimumContributionAmount),
+      deadline: Number(unixDate),
+      targetContribution: etherToWei(targetedContributionAmount),
+      projectTitle: title,
+      projectDesc: description,
+      account: account,
+    };
 
-       const onSuccess = () =>{
-        setBtnLoading(false)
-        setTitle("")
-        setDescription("")
-        setTargetedContributionAmount("")
-        setMinimumContributionAmount("")
-        setDeadline("")
-        toastSuccess("Fund rising started 🎉");
-      }
-
-       const onError = (error) =>{
-         setBtnLoading(false)
-         toastError(error);
-       }
-
-       const data = {
-        minimumContribution:etherToWei(minimumContributionAmount),
-        deadline:Number(unixDate),
-        targetContribution:etherToWei(targetedContributionAmount),
-        projectTitle:title,
-        projectDesc:description,
-        account:account
-       }
-
-       startFundRaising(web3,crowdFundingContract,data,onSuccess,onError,dispatch)
-    }
+    startFundRaising(web3, crowdFundingContract, data, onSuccess, onError, dispatch);
+  };
 
   return (
     <>
@@ -140,9 +95,7 @@ const FundRiserForm = () => {
           ></textarea>
         </div>
         <div className="form-control my-1">
-          <label className="text-sm text-gray-700">
-            Targeted contribution amount :
-          </label>
+          <label className="text-sm text-gray-700">Targeted contribution amount :</label>
           <input
             type="number"
             placeholder="Type here"
@@ -153,9 +106,7 @@ const FundRiserForm = () => {
           />
         </div>
         <div className="form-control my-1">
-          <label className="text-sm text-gray-700">
-            Minimum contribution amount :
-          </label>
+          <label className="text-sm text-gray-700">Minimum contribution amount :</label>
           <input
             type="number"
             placeholder="Type here"
@@ -176,29 +127,34 @@ const FundRiserForm = () => {
             required
           />
         </div>
-
         {isVerified ? (
-        <button
-          className="p-2 w-full bg-[#F56D91] text-white rounded-md hover:bg-[#d15677]"
-          disabled={btnLoading}
-        >
-          {btnLoading ? "Loading..." : "Raise fund"}
-        </button>
-      ) : (
-        <IDKitWidget
-        app_id="app_GBkZ1KlVUdFTjeMXKlVUdFT"
-        action="unique_person"
-        onSuccess={enableButton} // Call enableButton on success
-        verification_level={VerificationLevel.Device} // or "device"
-
-      >
-          {({ open }) => <button className="p-2 w-full bg-[#F56D91] text-white rounded-md hover:bg-[#d15677]" onClick={open}>Verify with World ID</button>}
-        </IDKitWidget>
-      )}
+          <button
+            className="p-2 w-full bg-[#F56D91] text-white rounded-md hover:bg-[#d15677]"
+            disabled={btnLoading}
+          >
+            {btnLoading ? "Loading..." : "Raise fund"}
+          </button>
+        ) : (
+          <IDKitWidget
+            app_id="app_GBkZ1KlVUdFTjeMXKlVUdFT"
+            action="unique_person"
+            onSuccess={enableButton}
+            verification_level={VerificationLevel.Device}
+          >
+            {({ open }) => (
+              <button
+                type="button"
+                className="p-2 w-full bg-[#F56D91] text-white rounded-md hover:bg-[#d15677]"
+                onClick={open}
+              >
+                Verify with World ID
+              </button>
+            )}
+          </IDKitWidget>
+        )}
       </form>
     </>
   );
-}
+};
 
-
-export default FundRiserForm
+export default FundRiserForm;
