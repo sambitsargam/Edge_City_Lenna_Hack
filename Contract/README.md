@@ -1,3 +1,3 @@
 # FundingHub Contract
 
-Verified Contract Address:  https://sepolia.explorer.mode.network/address/0x95896950eC74266E785e623a1652a1221d84AD35
+Verified Contract Address: https://testnet.snowscan.xyz/address/0xbad9cf51cc662238c097a98e9dbb2580ac37f2dc
