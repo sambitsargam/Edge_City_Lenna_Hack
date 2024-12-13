@@ -4,7 +4,7 @@ import ModeFundingHub from "../artifacts/contracts/ModeFundingHub.sol/ModeFundin
 import Project from "../artifacts/contracts/crowdfund.sol/Project.json";
 import { groupContributionByProject, groupContributors, projectDataFormatter, withdrawRequestDataFormatter} from "../helper/helper";
 
-const crowdFundingContractAddress = "0x95896950eC74266E785e623a1652a1221d84AD35";
+const crowdFundingContractAddress = "0xBad9cf51cC662238c097a98E9DBb2580AC37f2Dc";
 
 //Load web3 
 export const loadWeb3 = async (dispatch) => {

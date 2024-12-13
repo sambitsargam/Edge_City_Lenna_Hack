@@ -89,13 +89,13 @@ export const connectWithWallet = async (onSuccess) => {
       });
       const chainId = await window.ethereum.request({ method: "eth_chainId" });
 
-      if (chainId === "0x397") {
+      if (chainId === "0xa869") {
         onSuccess();
       } else {
         try {
           await ethereum.request({
             method: "wallet_switchEthereumChain",
-            params: [{ chainId: "0x397" }],
+            params: [{ chainId: "0xa869" }],
           });
           alert("Chain switched successfully try to Connect again");
         } catch (switchError) {
@@ -106,12 +106,12 @@ export const connectWithWallet = async (onSuccess) => {
                 method: "wallet_addEthereumChain",
                 params: [
                   {
-                    chainId: "0x397",
-                    chainName: "Mode Testnet Chain", 
-                    rpcUrls: ["https://sepolia.mode.network"],
+                    chainId: "0xa869",
+                    chainName: "Avalanche Fuji Testnet", 
+                    rpcUrls: ["https://avalanche-fuji-c-chain-rpc.publicnode.com"],
                     nativeCurrency: {
-                      name: "Ethereum",
-                      symbol: "ETH",
+                      name: "Avalanche",
+                      symbol: "AVAX",
                       decimals: 18,
                     },
                   },
